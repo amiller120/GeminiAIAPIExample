@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 90%;
+        }
+        textarea {
+            width: 100%;
+            height: 50em;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        input[type="submit"] {
+            width: 15%;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <textarea id="textArea" readonly></textarea>
+        <input type="text" id="textInput" placeholder="Type here...">
+        <input type="submit" id="submitButton" value="Post">
+    </div>
+    <script>
+        const chatMessages = [];
+
+        document.getElementById('submitButton').addEventListener('click', postText);
+        document.getElementById('textInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                postText();
+            }
+        });
+
+        async function postText() {
+            var textInput = document.getElementById('textInput');
+            var textArea = document.getElementById('textArea');
+            chatMessages.push(textInput.value);
+            let tempInputValue = textInput.value;
+            textInput.value = ''
+            textArea.value = chatMessages.join('\n')
+            textArea.scrollTop = textArea.scrollHeight
+
+            // Send the user's input to the server
+            var response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userInput: tempInputValue
+                })
+            });
+
+            // Get the server's response
+            var data = await response.json();
+
+            chatMessages.push(data)
+            // Add the server's response to the text area
+            textArea.value = chatMessages.join('\n')
+        }
+    </script>
+</body>
+</html>
